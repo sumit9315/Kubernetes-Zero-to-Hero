@@ -597,7 +597,9 @@ Check IP address and test with curl (within the cluster):
 minikube ssh
 curl <pod-ip>
 ```
+minikube ssh: Used to log in to the Minikube VM so you can access the pod’s internal network.
 
+curl <pod-ip>: Run from within the Minikube VM to test connectivity to the pod IP, since it’s only accessible internally.
 ---
 
 ### Clean Up Pod
