@@ -410,6 +410,59 @@ If using an IAM user, assign these:
 
 If using an admin user, no extra config needed.
 
+IAM Permissions for Non-admin Users
+
+If using an IAM user, assign the following permissions:
+
+EC2FullAccess
+
+S3FullAccess
+
+IAMFullAccess
+
+VPCFullAccess
+
+If using an admin user, no extra configuration is needed.
+
+🔧 Steps to Set These IAM Permissions:
+
+Log in to AWS ConsoleGo to https://console.aws.amazon.com/ and log in with an admin user.
+
+Open IAM ServiceSearch for and open IAM in the AWS Management Console.
+
+Choose or Create IAM User
+
+Navigate to Users from the left sidebar.
+
+If the user exists, click their username.
+
+If not, click Add users and follow the prompts to create a new IAM user.
+
+Attach Required Policies
+
+Click Add permissions → Attach policies directly.
+
+Search and select the following policies:
+
+AmazonEC2FullAccess
+
+AmazonS3FullAccess
+
+IAMFullAccess
+
+AmazonVPCFullAccess
+
+Click Next and then Add permissions.
+
+VerifyAfter saving, go to the Permissions tab of the IAM user and verify the 4 policies are listed.
+
+(Optional) Create Access Key for CLI
+
+Go to the Security credentials tab.
+
+Click Create access key.
+
+Use the key and secret in CLI setup via:
 ---
 
 ### Install `kops`
