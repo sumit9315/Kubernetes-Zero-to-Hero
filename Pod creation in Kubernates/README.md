@@ -1,6 +1,4 @@
-**Kubernetes in Production: Transcript (Formatted)**
 
----
 
 🧠 **Day 33: Deploy Your First Application in Kubernetes**
 
