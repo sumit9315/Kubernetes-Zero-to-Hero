@@ -4,15 +4,10 @@
 
 🧠 **Day 33: Deploy Your First Application in Kubernetes**
 
-### Why Watch Previous Videos First?
 
-Before watching this, make sure to cover Day 30, 31, and 32:
 
-* **Day 30**: Docker to Kubernetes transition
-* **Day 31**: Kubernetes architecture
-* **Day 32**: Kubernetes installation (Minikube, kops)
 
----
+
 
 ### Why Kubernetes Over Docker?
 
