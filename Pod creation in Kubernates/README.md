@@ -341,5 +341,332 @@ You’ll learn this in the **next video**.
 Stay consistent to master core Kubernetes fundamentals before diving into deployments, services, and advanced configurations.
 
 ---
+**Kubernetes in Production: Transcript (Formatted Verbatim)**
 
-Would you like this full walkthrough as a downloadable PDF, or should I include it in your existing document?
+---
+
+Foreign, my name is Abhishek and welcome back to my channel.
+
+Today we are at **Day 33** of our complete DevOps course, and in this class, we are going to see **how to deploy our first application in Kubernetes**.
+
+Before watching this video, I'll highly recommend you to watch the previous videos (Day 30, 31, and 32).
+
+The reason why I ask everyone to watch these videos is because from Docker to Kubernetes — before you start your journey with Kubernetes, you have to understand:
+
+* The **differences between Docker and Kubernetes** — this is one part of it.
+* The **architecture of Kubernetes**.
+* **How to install Kubernetes**.
+
+We covered these three topics in Day 30, 31, and 32. So, if you don't have the knowledge of these things, then I will recommend you to **not watch this video yet**. Go back, watch the videos, and then come back to this one. Only then you will understand today’s concept.
+
+---
+
+From Day 30, I have been stressing on a few points:
+
+* **Why Kubernetes is better than Docker**, and
+* **Why people move to Kubernetes**.
+
+Some key reasons are:
+
+1. Kubernetes is a **cluster**.
+2. Kubernetes offers **auto scaling**.
+3. Kubernetes offers **auto healing**.
+4. Kubernetes offers **enterprise-level behavior**.
+
+Using Kubernetes, you can support a lot of things for your containers. These are the four primary things.
+
+To achieve all of these, you have to learn a few terminologies — just like we learned Docker terminologies in one of our previous classes.
+
+---
+
+### Introducing Key Kubernetes Concepts
+
+I’m not going to talk about the architecture again because we already covered it. But I will introduce you to a few things to make your Kubernetes understanding better.
+
+I don't want to jump directly into “what is a pod” or “how to deploy a pod” and run an application. I can do that in 15 minutes, but it won’t help if the fundamentals are not clear.
+
+Firstly, we are moving from **Docker** to **Kubernetes** — from containers to container orchestration.
+
+In Kubernetes, the **lowest level of deployment is a Pod**.
+
+---
+
+### Why Pod Instead of Container?
+
+In Kubernetes, you cannot directly deploy a container like in Docker. In Docker, you build and deploy a container. In Kubernetes, we still use Docker containers internally, because end of the day both Docker and Kubernetes aim to run applications in containers.
+
+But Kubernetes says: *Don't deploy your application as a container, deploy it as a **Pod**.*
+
+So, what is a Pod?
+
+A **Pod** is a definition of how to run a container. In Docker, when you run a container, you might use:
+
+```bash
+docker run -d -p 80:80 -v /data:/app nginx:1.14.2
+```
+
+You're passing various arguments like port mappings, volume mounts, and networks directly on the command line.
+
+In **Kubernetes**, instead of the CLI command, you define those specifications in a `pod.yaml` file.
+
+Kubernetes abstracts these container definitions in YAML, offering **standardization** and **declarative management**.
+
+---
+
+### YAML File Structure
+
+Instead of using `docker run`, we define the same things in a structured YAML file:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  containers:
+    - name: nginx
+      image: nginx:1.14.2
+      ports:
+        - containerPort: 80
+```
+
+You don’t need to memorize this. Everyone — junior or senior DevOps engineers — refers to the official documentation or templates.
+
+---
+
+### Why YAML?
+
+Kubernetes is an **enterprise-level platform**. It wants to:
+
+* Enable **declarative capabilities**
+* **Standardize** how resources are defined and managed
+
+Everything in Kubernetes — whether it's a **pod**, **deployment**, or **service** — is written in **YAML**.
+
+You don’t have to memorize the syntax. You need to understand **how** YAML works so you can modify templates.
+
+---
+
+### Single vs Multi-container Pods
+
+Usually, a Pod contains a **single container**, but you can have **multiple containers** in one Pod when needed.
+
+Example:
+
+* A main application container
+* A sidecar container that fetches config files
+
+Benefits of multiple containers in a Pod:
+
+* **Shared networking** (they communicate via `localhost`)
+* **Shared storage** (via shared volumes)
+
+This is useful in rare use cases and advanced scenarios like **init containers**, **sidecars**, and **service mesh**.
+
+---
+
+### How Kubernetes Handles IPs
+
+* Pods are assigned a **Cluster IP address**.
+* IPs are assigned to **Pods**, not individual containers.
+* You access applications via the Pod’s IP.
+
+---
+
+A Pod is a **wrapper** around a container to simplify the life of DevOps engineers, especially when managing thousands of containers in production.
+
+Instead of checking `docker run` arguments, a DevOps engineer can just open a `pod.yaml` and see everything:
+
+* Which image is used
+* Which port is exposed
+* What volume is mounted
+* What network settings are configured
+
+... and so on.
+
+✅ This is a properly formatted and clean version of your original transcript with zero word deletion.
+
+### What is `kubectl`?
+
+So, what is kubectl? Just like in Docker you use the Docker CLI to run containers, in Kubernetes you use the `kubectl` CLI tool to interact with your Kubernetes clusters.
+
+You can use commands like:
+
+* `kubectl get nodes` — to list all nodes in the cluster
+* `kubectl get pods` — to list all running pods
+* `kubectl delete pod <name>` — to delete a specific pod
+
+---
+
+### Installing `kubectl` and Minikube
+
+#### Step 1: Install kubectl
+
+* Go to Google and search "kubectl installation"
+* Click on the Kubernetes page: `install tools - Kubernetes`
+* Choose your OS (Linux, macOS, Windows)
+* For macOS (with Silicon chip e.g., M1/M2):
+
+  * Copy the script
+  * Run it in terminal
+* Confirm installation:
+
+```bash
+kubectl version --client
+```
+
+#### Step 2: Install Minikube
+
+* Search for "Minikube install"
+* Visit the Minikube Kubernetes page
+* Select your operating system
+* Choose architecture: `x86_64` or `arm64` based on your system
+* Follow installation steps (copy the curl script and install)
+
+Verify Minikube:
+
+```bash
+minikube version
+```
+
+---
+
+### Creating Your First Kubernetes Cluster
+
+#### Start Minikube:
+
+```bash
+minikube start
+```
+
+Optionally, specify resources:
+
+```bash
+minikube start --driver=hyperkit --memory=4096
+```
+
+> Minikube creates a **single-node Kubernetes cluster** on a local VM (e.g., via Docker, VirtualBox, or Hyperkit).
+
+#### Check Node Status:
+
+```bash
+kubectl get nodes
+```
+
+You’ll see your Minikube node with status `Ready`.
+
+This node acts as both the **Control Plane** and **Worker Node**.
+
+---
+
+### Deploying Your First Pod
+
+Search "Kubernetes pod yaml example" and copy this default sample:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.14.2
+    ports:
+    - containerPort: 80
+```
+
+> Save it as `pod.yaml`
+
+Run the pod:
+
+```bash
+kubectl create -f pod.yaml
+```
+
+Verify pod status:
+
+```bash
+kubectl get pods
+kubectl get pods -o wide
+```
+
+Check IP address and test with curl (within the cluster):
+
+```bash
+minikube ssh
+curl <pod-ip>
+```
+
+---
+
+### Clean Up Pod
+
+```bash
+kubectl delete pod nginx
+```
+
+---
+
+### Debugging Pods in Kubernetes
+
+You can debug your application using:
+
+```bash
+kubectl logs <pod-name>
+```
+
+This command shows logs from inside the pod's container.
+
+Another useful command:
+
+```bash
+kubectl describe pod <pod-name>
+```
+
+This gives a full status report:
+
+* Events
+* Resource allocations
+* Errors (if any)
+
+For example:
+
+```bash
+kubectl logs nginx
+kubectl describe pod nginx
+```
+
+> `logs` helps you read runtime output.
+> `describe` helps you understand setup issues, state, events, and container health.
+
+If your application doesn’t produce logs by default (like nginx), there might not be much to see in `kubectl logs`. But for real apps, this is very useful.
+
+---
+
+### What's Next?
+
+We deployed our first pod, accessed it, and debugged it.
+
+Next step: enable auto-scaling and auto-healing. These features come from using **Deployments**, not just Pods.
+
+Pods are the basic units, but:
+
+* **Deployments** wrap Pods
+* They enable replication, rollouts, rollbacks, auto-healing, and scaling
+
+In the next session, we will:
+
+* Write a `deployment.yaml`
+* Learn how Deployments relate to Pods
+* Understand how to make our application production-ready
+
+So today’s video is fundamental. Practice everything.
+
+👉 Also revisit the earlier videos on:
+
+* Docker basics
+* Kubernetes installation
+* Cluster structure
+
+
