@@ -1,4 +1,4 @@
-**Kubernetes in Production: Transcript – Day 31 (Grammar Corrected, Full Transcript with Original Wording)**
+
 
 ---
 
@@ -165,8 +165,140 @@ Draw a diagram showing control plane and data plane, showing how components inte
 
 This helps your visibility and shows your understanding to potential interviewers.
 
-If you have questions, drop them in the comments. I’ll reply and explain further.
+**Kubernetes in Production: Transcript – Day 31 (Formatted and Grammar-Corrected)**
 
-If you liked the video, click like, share with friends/colleagues, and subscribe.
+---
 
-Thanks for watching, and I’ll see you in the next video where we’ll learn about Kubernetes pods.
+Hello everyone, my name is Abhishek and welcome back to my channel. Today, we are at **Day 31** of our free DevOps course, and in this video, I'll be talking about the **Kubernetes architecture**.
+
+Before we jump into today’s topic, let’s begin with a fun question:
+
+> **Why is Kubernetes called K8s?**
+
+Everyone knows that Kubernetes is shortened to **K8s**, but why exactly is it called that? This isn’t an interview question—just a fun way to start before we dive into a complex topic. If you know the answer, drop it in the comments!
+
+---
+
+### Docker vs Kubernetes
+
+Before understanding Kubernetes architecture, you must understand how it differs from Docker. This was the focus of **Day 30**, so I highly recommend you watch that video first.
+
+If you don’t understand what Docker offers as a container platform, and why Kubernetes evolved to orchestrate containers, you’ll struggle to grasp Kubernetes architecture.
+
+#### Key Advantages of Kubernetes Over Docker:
+
+1. Clustered by default
+2. Auto-healing
+3. Auto-scaling
+4. Enterprise-level features like advanced load balancing, security, and networking
+
+These four pillars will help us understand the architecture better.
+
+You may already know that Kubernetes architecture has two main parts:
+
+* **Control Plane**
+* **Data Plane**
+
+The control plane includes:
+
+* API Server
+* etcd
+* Scheduler
+* Controller Manager
+* Cloud Controller Manager
+
+The data plane includes:
+
+* kubelet
+* kube-proxy
+* Container Runtime
+
+But rather than listing these, let’s compare with Docker to make sense of them.
+
+---
+
+### Docker (Simplified)
+
+In Docker:
+
+* You have a virtual machine with Docker installed.
+* You run `docker run` to start a container.
+* Under the hood, Docker uses **Docker shim** as the container runtime.
+
+If your app (e.g., a Java app) needs Java runtime and it's not installed, it won’t work. Similarly, Docker needs a container runtime to run containers.
+
+---
+
+### Kubernetes (Simplified)
+
+Kubernetes is more advanced:
+
+* It supports enterprise features.
+* It consists of **master and worker nodes**.
+* Requests go through the **control plane** (master), not directly to workers.
+
+In Kubernetes, you deploy a **pod** (like a container, but more powerful).
+
+#### Worker Node Components:
+
+1. **kubelet**: Ensures pods are running and healthy. Reports issues.
+2. **Container Runtime**: Runs containers inside pods.
+
+   * Kubernetes supports Docker shim, containerd, CRI-O, etc.
+3. **kube-proxy**: Handles networking, IP address assignment, and basic load balancing using iptables.
+
+These three make up the **data plane**.
+
+---
+
+### Control Plane Components:
+
+Why do we need a control plane?
+
+* To decide **where** to run pods
+* To manage large systems, apply security policies, schedule tasks, etc.
+
+1. **API Server**: Entry point for all external communication. It receives user requests.
+2. **Scheduler**: Determines which node should run a pod.
+3. **etcd**: A key-value store that holds the entire state of the cluster.
+4. **Controller Manager**: Ensures desired state of the cluster (e.g., ensuring 2 pods are running if requested).
+5. **Cloud Controller Manager**: Used in cloud environments (EKS, AKS, GKE). Handles cloud-specific logic like creating load balancers or attaching storage.
+
+> ⚠️ Not needed for on-prem clusters.
+
+---
+
+### Visual Summary:
+
+**Control Plane (Master Node)**:
+
+* API Server
+* Scheduler
+* etcd
+* Controller Manager
+* Cloud Controller Manager
+
+**Data Plane (Worker Nodes)**:
+
+* kubelet
+* kube-proxy
+* container runtime
+
+The control plane **decides and controls**; the data plane **executes** those decisions.
+
+---
+
+### Assignment:
+
+As a practical task:
+
+1. Draw the architecture diagram with all components.
+2. Take pod creation as an example and illustrate how each component is involved.
+3. Post this on GitHub and LinkedIn.
+
+This shows potential employers that you understand Kubernetes architecture.
+
+---
+
+
+
