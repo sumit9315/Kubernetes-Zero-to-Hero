@@ -2,15 +2,8 @@
 
 🧠 **Day 33: Deploy Your First Application in Kubernetes**
 
-**Kubernetes in Production: Transcript (Formatted Verbatim)**
-
 ---
 
-Foreign, my name is Abhishek and welcome back to my channel.
-
-Today we are at **Day 33** of our complete DevOps course, and in this class, we are going to see **how to deploy our first application in Kubernetes**.
-
-Before watching this video, I'll highly recommend you to watch the previous videos (Day 30, 31, and 32).
 
 The reason why I ask everyone to watch these videos is because from Docker to Kubernetes — before you start your journey with Kubernetes, you have to understand:
 
@@ -18,7 +11,7 @@ The reason why I ask everyone to watch these videos is because from Docker to Ku
 * The **architecture of Kubernetes**.
 * **How to install Kubernetes**.
 
-We covered these three topics in Day 30, 31, and 32. So, if you don't have the knowledge of these things, then I will recommend you to **not watch this video yet**. Go back, watch the videos, and then come back to this one. Only then you will understand today’s concept.
+
 
 ---
 
