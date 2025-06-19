@@ -1,3 +1,226 @@
+## Kubernetes Services Deep Dive - Day 37 of DevOps Course
+
+**Speaker:** Abhishek
+
+---
+
+Hello everyone, my name is Abhishek and welcome back to my channel. Today we are at **Day 37** of our complete DevOps course. In this class, we will **deep dive into Kubernetes services**. This means we’ll be doing a **practical session** on Kubernetes services where you will see:
+
+* Load balancing
+* Service discovery
+* Exposing applications to the outside world
+
+I’ll recommend everyone to watch this video till the end because we’ll be using a tool called **Cubeshark** to view live traffic, showing how each Kubernetes component talks to another.
+
+---
+
+## Kubernetes Cluster Setup
+
+* Using a **Minikube cluster**.
+* Verified the cluster using:
+
+```sh
+minikube status
+kubectl get all
+```
+
+* Deleted old deployments and services using:
+
+```sh
+kubectl delete deploy <name>
+kubectl delete svc <name>
+```
+
+---
+
+## Using Docker Image from GitHub
+
+* GitHub repo: **Docker-0-to-Hero**
+* URL: `https://github.com/AbhishekGhosh/Docker-0-to-Hero`
+* Used a **Python Django app** from this repo.
+
+---
+
+## Build Docker Image
+
+```sh
+docker build -t python-sample-application-demo:v1 .
+```
+
+---
+
+## Kubernetes Deployment
+
+1. Use official Kubernetes docs to create `deployment.yaml`.
+2. Make the following changes:
+
+   * Set **replicas** to `2`
+   * Update **metadata.name** to `sample-python-app`
+   * Add **labels** to deployment and pod
+   * Replace container **image** with built image
+   * Set **containerPort** to `8000`
+3. Apply the deployment:
+
+```sh
+kubectl apply -f deployment.yaml
+```
+
+4. Check deployment:
+
+```sh
+kubectl get deploy
+kubectl get pods
+kubectl get pods -o wide
+```
+
+To understand behind-the-scenes communication with the API server:
+
+```sh
+kubectl get pods -v=9
+```
+
+---
+
+## Dynamic IP Problem
+
+* Pods get **dynamic IPs**.
+* On pod recreation, IP may change.
+* This creates **traffic loss** if services depend on IP.
+
+---
+
+## Role of Kubernetes Services
+
+* Solve IP change issues via **labels and selectors**.
+* Services use labels to discover pods regardless of IP.
+
+---
+
+## Expose Pod using NodePort
+
+1. Create `service.yaml` from Kubernetes official docs.
+2. Change type to `NodePort`.
+3. Add `selector` matching pod labels.
+4. Set `targetPort` to `8000`.
+5. Choose `nodePort`, e.g., `30007`.
+
+```sh
+kubectl apply -f service.yaml
+kubectl get svc
+minikube ip
+```
+
+6. Access the app via:
+
+```sh
+curl -L http://<minikube-ip>:30007/demo
+```
+
+---
+
+## Load Balancer Type (Cloud Only)
+
+* Change service type to `LoadBalancer`:
+
+```sh
+kubectl edit svc <service-name>
+```
+
+* External IP will remain `pending` on Minikube.
+* On AWS/Azure/GCP, an IP is assigned by the **Cloud Controller Manager**.
+* On Minikube, use **MetalLB** project if needed.
+
+---
+
+## Service Discovery Failure
+
+* Change selector label in service to a wrong one.
+* Reapply the service and see failure:
+
+```sh
+kubectl apply -f service.yaml
+curl -L http://<minikube-ip>:30007/demo
+```
+
+* Update label back correctly and reapply.
+* Traffic works again.
+
+---
+
+## Load Balancing Demonstration
+
+* Service will load balance between pods using **Round Robin**.
+* Use **Cubeshark** to visualize traffic.
+
+### Install Cubeshark
+
+* Official website: [Cubeshark](https://cubeshark.com)
+* Simple installation via:
+
+```sh
+curl -sSL https://cubeshark.io/install | sh
+cubeshark tap -a
+```
+
+### Access Cubeshark UI
+
+```sh
+http://localhost:8899
+```
+
+### Simulate Traffic
+
+```sh
+for i in {1..6}; do curl http://<minikube-ip>:30007/demo; done
+```
+
+* Observe packets go to both pod IPs (e.g., `.5`, `.7`).
+
+---
+
+## Cubeshark Packet Flow
+
+* Source: Your laptop (e.g., `192.168.64.1`)
+* Destination: Minikube node IP (`192.168.64.10`)
+* Request goes through service, distributed to pod IPs
+* Replayed and analyzed in Cubeshark UI
+
+---
+
+## Concepts Covered
+
+1. **Service Discovery** using labels and selectors
+2. **Exposing applications** using NodePort and LoadBalancer
+3. **Load Balancing** across multiple pods
+
+---
+
+## Summary
+
+* Minikube used as test cluster
+* Python Django app containerized and deployed
+* Explored real Kubernetes behavior: dynamic IPs, selector matching, node IP exposure
+* Tools used:
+
+  * `kubectl`
+  * `minikube`
+  * `Cubeshark`
+* Cubeshark visualized internal packet routing and load balancing
+
+---
+
+## Final Notes
+
+* For deeper understanding of **Cubeshark**, a dedicated video will be released
+* If you liked the video, please:
+
+  * Click the **like** button
+  * Share with your **friends and colleagues**
+  * Leave your **feedback in comments**
+
+Thank you so much, everyone. See you in the next video. Take care and goodbye!
+
+
 ![image](https://github.com/user-attachments/assets/cf4f4161-6997-4553-9feb-bcb422fabb7e)
 ![image](https://github.com/user-attachments/assets/cf4f4161-6997-4553-9feb-bcb422fabb7e)
 ![image](https://github.com/user-attachments/assets/54380653-4221-49eb-8814-fc246ff8c807)
