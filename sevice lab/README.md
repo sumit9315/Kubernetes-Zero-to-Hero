@@ -10,6 +10,222 @@
 ![image](https://github.com/user-attachments/assets/62c0f6d9-14c2-43a2-aa96-1d81592ff617)
 ![image](https://github.com/user-attachments/assets/09fd8cd6-681d-435f-ae15-eea8b220d7b1)
 ![image](https://github.com/user-attachments/assets/3d4baf0e-3407-4058-b2e5-c689835eb826)
+
+Here’s your entire transcript formatted and rewritten with corrected grammar, while preserving all the original content and tone as closely as possible:
+
+---
+
+**Hello everyone!**
+My name is Abhishek, and welcome back to my channel. Today is **Day 37** of our complete DevOps course, and in this class, we’ll do a deep dive into **Kubernetes Services**. That means we’ll be doing a **practical session** on Kubernetes services where you'll see the aspects we’ve been discussing — like **load balancing**, **service discovery**, and **how to expose your application to the outside world** using Kubernetes.
+
+Everything in today’s session is hands-on. I recommend everyone watch the video until the end because we’ll be using **Cubeshark**, a tool that helps visualize traffic inside Kubernetes — how components communicate, how services perform load balancing across multiple pods, and how discovery works.
+
+So, without wasting any time, let’s jump into the video. But a quick disclaimer and an important point: even if you know the concepts of services, you should still watch until the end because using Cubeshark, I’ll show **how traffic flows practically**, which makes this session extremely useful.
+
+---
+
+### 🔧 Setting Up the Kubernetes Cluster
+
+I already have a Kubernetes cluster set up using **Minikube** for the purpose of this demo.
+
+```bash
+minikube status
+```
+
+This confirms the Kubernetes cluster is up and running.
+
+> If you’re unsure how to create a Kubernetes cluster, check my previous videos where I explain it using both **Minikube** and **AWS (using kOps)**.
+
+Now, let’s clean the existing resources:
+
+```bash
+kubectl get all
+kubectl delete deploy <your-deployment>
+kubectl delete svc <your-service>
+```
+
+After deletion, if you run `kubectl get all`, only the **default Kubernetes service** should remain.
+
+---
+
+### 🐳 Building and Deploying the Application
+
+For today’s demo, I’ll use the **Docker 0-to-Hero repository**, which you can find on my GitHub:
+
+```text
+https://github.com/<your-username>/docker-0-to-hero
+```
+
+This repo contains real-time backend/frontend images built using Python and Golang. We’ll use the Python app today.
+
+Inside the Python folder, you’ll find a `Dockerfile` and `requirements.txt`. Let’s start by **building the Docker image**:
+
+```bash
+docker build -t python-sample-app-demo:v1 .
+```
+
+Next, let’s create a **Kubernetes deployment YAML** file:
+
+```bash
+kubectl create deployment sample-python-app --image=python-sample-app-demo:v1 --dry-run=client -o yaml > deployment.yaml
+```
+
+Modify `deployment.yaml` to:
+
+* Set **replicas to 2** (to demo load balancing).
+* Add appropriate **labels** (`app: sample-python-app`).
+* Expose **container port 8000** (as per your Dockerfile).
+* Make sure labels in the pod match the **selector** in the deployment.
+
+Apply the deployment:
+
+```bash
+kubectl apply -f deployment.yaml
+```
+
+Verify deployment and pods:
+
+```bash
+kubectl get deploy
+kubectl get pods
+kubectl get pods -o wide
+```
+
+> Tip: Use `-v=7` or `-v=9` with kubectl for verbose output to see API calls and responses.
+
+---
+
+### 📡 Exposing the Application via Services
+
+Pods created by deployments are **only accessible inside the cluster**. To make them accessible, we use **Kubernetes Services**.
+
+We’ll begin with **NodePort** service type.
+
+1. Create a `service.yaml` using the Kubernetes official documentation.
+2. Use the same selector labels (`app: sample-python-app`).
+3. Set `type: NodePort`.
+4. Set `port: 80`, `targetPort: 8000`, and `nodePort: 30007`.
+
+Apply the service:
+
+```bash
+kubectl apply -f service.yaml
+```
+
+Check the service:
+
+```bash
+kubectl get svc
+```
+
+To access the app:
+
+* From inside the cluster:
+
+  ```bash
+  curl -L http://<POD-IP>:8000/demo
+  ```
+
+* From outside (on the same machine):
+
+  ```bash
+  minikube ip
+  curl -L http://<NODE-IP>:30007/demo
+  ```
+
+Or simply paste in the browser:
+
+```url
+http://<NODE-IP>:30007/demo
+```
+
+> This works because both Minikube VM and your browser are on the same machine. External users can’t access this unless you use a LoadBalancer.
+
+---
+
+### 🌐 Switching to LoadBalancer
+
+To expose the application **to the internet**, edit the service:
+
+```bash
+kubectl edit svc python-django-app-service
+```
+
+Change the `type: NodePort` to:
+
+```yaml
+type: LoadBalancer
+```
+
+> On cloud providers (AWS, GCP, Azure), this creates a public IP automatically. Not available on Minikube unless using **MetalLB** (a separate project).
+
+---
+
+### 🔍 Service Discovery Demo
+
+To understand **service discovery**, intentionally **break the selector** in your service (change one character).
+
+Reapply the service:
+
+```bash
+kubectl apply -f service.yaml
+```
+
+Try accessing again — you’ll see traffic fails because the **selector doesn’t match any pod label**. This proves Kubernetes uses **labels and selectors** for service discovery.
+
+Revert the selector and reapply — traffic resumes.
+
+---
+
+### ⚖️ Load Balancing Demo using Cubeshark
+
+Install Cubeshark and launch it:
+
+```bash
+cubeshark tap -A
+```
+
+Open:
+
+```url
+http://localhost:8899
+```
+
+Now hit the service endpoint 6 times using:
+
+```bash
+curl -L http://<NODE-IP>:30007/demo
+```
+
+Open Cubeshark, and you’ll see alternating traffic — 3 requests to pod 1, 3 to pod 2. This is Kubernetes **load balancing** via **round robin**.
+
+---
+
+### ✅ Recap of Key Concepts
+
+In this session, we covered **three core capabilities** of Kubernetes Services:
+
+1. **Service Discovery** — via labels and selectors.
+2. **Application Exposure** — using `NodePort` and `LoadBalancer`.
+3. **Load Balancing** — across multiple pod replicas.
+
+---
+
+Thank you for watching! 🙌
+If you enjoyed this video:
+
+* **Like** the video
+* **Comment** your feedback or questions
+* **Share** with your friends and colleagues
+
+See you in the next session — take care and happy DevOps learning!
+**– Abhishek**
+
+---
+
+Let me know if you'd like this as a PDF or broken into sections with diagrams.
+
+
 hello everyone my name is Abhishek and welcome back to my channel so today we are at day 37 of our complete devops
 course and in this class we will Deep dive into kubernetes services that means we'll be doing practical session on
 kubernetes service where you will see the aspects that we were talking about like the load balancing service
