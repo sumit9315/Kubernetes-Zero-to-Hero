@@ -1,3 +1,237 @@
+## Kubernetes Ingress - Day 38 of Complete DevOps Course
+
+**Speaker:** Abhishek
+
+---
+
+Hello everyone, my name is Abhishek and welcome back to my channel. Today we are at **Day 38** of our complete DevOps course. In this class, we will be learning about **Kubernetes Ingress**.
+
+---
+
+### Why People Struggle With Ingress
+
+People often find Ingress tricky due to:
+
+1. **Lack of understanding of why it is needed**
+2. **Failed local implementations on Minikube or other clusters**
+
+Even though we have a detailed video on Ingress, today we will also cover:
+
+* **Theory**
+* **Practical setup on Minikube**
+
+---
+
+### Prerequisite
+
+Please watch **Video 37** on Kubernetes Services before this one.
+
+---
+
+### Why Do We Need Ingress?
+
+Previously, Kubernetes **Services** helped with:
+
+* Service discovery using label and selector
+* Load balancing (round-robin) using LoadBalancer
+* External access via NodePort or LoadBalancer
+* Dynamic IP Issue by using label and selector
+
+But this setup had two key problems:
+
+#### Problem 1: Lack of Advanced Load Balancing
+
+Traditional load balancers (e.g., NGINX, F5, HAProxy) provided:
+
+* Sticky sessions
+* Path/host-based routing
+* TLS/HTTPS support
+* Whitelisting/blacklisting
+* WAF and more
+
+Kubernetes Service only supports **round-robin**, lacking these enterprise features.
+
+#### Problem 2: Cost of LoadBalancer IPs
+
+* Every `LoadBalancer` type Service creates a **static public IP**.
+* Cloud providers charge for **each IP**.
+* In companies like Amazon for 1000 of application ,we may create 1000s of services, so it will create 1000 of static ip and static ip are chargeble so this becomes expensive.
+
+---
+
+### Solution: Kubernetes Ingress
+
+To solve both problems:
+
+* Kubernetes introduced **Ingress** in version 1.1.
+* Ingress allows you to define routing **rules**.
+* It requires an **Ingress Controller** to process these rules.
+
+---
+
+### What Is an Ingress Controller?
+
+* It is a **component** (usually a pod) deployed on your cluster.
+* Watches for Ingress resources and configures routing logic.
+* Examples:
+
+  * **NGINX Ingress Controller**
+  * **F5, HAProxy, Traefik, Ambassador**
+
+---
+
+### Ingress Architecture
+
+1. You write an **Ingress resource** (YAML)
+2. You install an **Ingress Controller** (e.g., via Helm)
+3. The controller reads the Ingress resource and configures the load balancer
+
+This way, Kubernetes delegates routing logic to the controller.
+
+---
+
+### Ingress Use Cases
+
+* **Host-based routing:**
+
+  * `app1.mycompany.com` → Service A
+  * `app2.mycompany.com` → Service B
+* **Path-based routing:**
+
+  * `/login` → Auth service
+  * `/products` → Product service
+* **TLS termination**
+* **HTTPS offloading**
+
+---
+
+### Practical Setup
+
+#### Step 1: Confirm Service Works
+
+```sh
+minikube ip
+kubectl get svc
+curl http://<minikube-ip>:<nodeport>/demo
+```
+
+#### Step 2: Create an Ingress Resource
+
+Example:
+
+```yaml
+# ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-example
+spec:
+  rules:
+  - host: foo.bar.com
+    http:
+      paths:
+      - path: /bar
+        pathType: Prefix
+        backend:
+          service:
+            name: python-django-app-service
+            port:
+              number: 80
+```
+
+Apply:
+
+```sh
+kubectl apply -f ingress.yaml
+```
+
+Check:
+
+```sh
+kubectl get ingress
+```
+
+> You will see no external address unless you install the Ingress Controller.
+
+#### Step 3: Install NGINX Ingress Controller on Minikube
+
+```sh
+minikube addons enable ingress
+```
+
+Check:
+
+```sh
+kubectl get pods -A | grep ingress
+kubectl logs -n ingress-nginx <controller-pod-name>
+```
+
+You should see the message:
+
+> Synced configuration for ingress-example
+
+#### Step 4: Update /etc/hosts (Local Only)
+
+```sh
+sudo nano /etc/hosts
+# Add line:
+192.168.64.11 foo.bar.com
+```
+
+> Replace with your actual Minikube IP
+
+#### Step 5: Test Host-Based Routing
+
+```sh
+curl http://foo.bar.com/bar
+```
+
+You should see the application response.
+
+---
+
+### Additional Ingress Features
+
+Search the Kubernetes documentation for:
+
+* `TLS` based Ingress
+* `wildcard` domains
+* Advanced annotations
+
+---
+
+### Production Tips
+
+* In production, use Helm to install Ingress Controllers.
+* Use real DNS (e.g., `app.company.com`) instead of `/etc/hosts`
+
+---
+
+### Conclusion
+
+* Ingress solves **two major problems** in Kubernetes:
+
+  * Missing enterprise-grade load balancing features
+  * Cost of static IPs for each LoadBalancer service
+* Always remember to install an Ingress Controller
+* Configure Ingress resources based on your routing needs
+
+---
+
+### Next Steps
+
+If you want deeper understanding:
+
+* Watch the full-length Ingress video (linked in the description)
+* Try out:
+
+  * TLS termination
+  * Path + host-based rules
+  * SSL passthrough
+
+If you liked the video, click the **Like** button, leave your **comments**, and share with your **friends and colleagues**.
+
+**Thank you! See you in the next video.**
 Great! Since you've already added the **Kubernetes Services** demo in a clean format in your document, now let’s prepare a **step-by-step formatted extension** for **Day 38: Kubernetes Ingress** based on the full transcript you shared.
 
 ---
