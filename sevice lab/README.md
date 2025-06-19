@@ -1,3 +1,377 @@
+**Hello everyone!**
+
+My name is Abhishek, and welcome back to my channel. So today we are at **Day 37** of our complete DevOps course and in this class, we will **deep dive into Kubernetes services**. That means we'll be doing a **practical session** on Kubernetes Services where you will see the aspects that we were talking about like **load balancing**, **service discovery**, as well as **how to expose your applications to the outside world** in Kubernetes.
+
+So everything will be practical. I'll recommend everybody to watch the video till the end because we are doing practical traffic viewing using **Cubeshark**. So Cubeshark is a tool which will help you to understand how traffic is flowing within the Kubernetes cluster — how each component of Kubernetes is talking, like how one component is talking to the other component. So it will be a very interesting session, and you will see all the capabilities using Cubeshark — like how services are doing the load balancing within multiple pods, how services are able to discover the pods, and also we will see how to expose the applications to the outside world as well as within the Kubernetes cluster and within your organization.
+
+Perfect. So without wasting any time, I'll quickly jump onto the video. But a disclaimer and a very important point — watch the video till the end because even if you know the concept of services, even if you understand Kubernetes, using Cubeshark I am going to show you **how the traffic is flowing**, so it's a very useful session.
+
+---
+
+## 🔧 Step-by-Step Kubernetes Services Demo
+
+### 1. Setup: Minikube Kubernetes Cluster
+
+```bash
+minikube status
+```
+
+Check cluster status. Clean existing deployments/services:
+
+```bash
+kubectl get all
+kubectl delete deploy <your-deployment-name>
+kubectl delete svc <your-service-name>
+```
+
+You should only see the default Kubernetes service after cleanup:
+
+```bash
+kubectl get all
+```
+
+---
+
+### 2. Docker Image: Build Python App
+
+Use [docker-0-to-hero repo](https://github.com/<your-username>/docker-0-to-hero) which contains Python & Golang-based apps.
+Navigate to Python app folder:
+
+```bash
+cd examples/python
+```
+
+Build the Docker image:
+
+```bash
+docker build -t python-sample-app-demo:v1 .
+```
+
+---
+
+### 3. Create Kubernetes Deployment
+
+Generate a YAML template:
+
+```bash
+kubectl create deployment sample-python-app --image=python-sample-app-demo:v1 --dry-run=client -o yaml > deployment.yaml
+```
+
+Edit the `deployment.yaml`:
+
+* Change `replicas: 2`
+* Use labels like `app: sample-python-app`
+* Set containerPort to `8000`
+
+Apply deployment:
+
+```bash
+kubectl apply -f deployment.yaml
+```
+
+Verify:
+
+```bash
+kubectl get deploy
+kubectl get pods
+kubectl get pods -o wide
+```
+
+Verbose output (optional):
+
+```bash
+kubectl get pods -v=7
+```
+
+---
+
+### 4. Access Application (Internal Cluster Test)
+
+```bash
+minikube ssh
+curl -L http://<POD-IP>:8000/demo
+```
+
+You can find POD IP using:
+
+```bash
+kubectl get pods -o wide
+```
+
+Note: `/demo` is the context root as defined in the app's `urls.py`.
+
+---
+
+### 5. Create a NodePort Service
+
+Create `service.yaml`:
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: python-django-app-service
+spec:
+  type: NodePort
+  selector:
+    app: sample-python-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
+      nodePort: 30007
+```
+
+Apply and verify:
+
+```bash
+kubectl apply -f service.yaml
+kubectl get svc
+```
+
+Check Minikube IP:
+
+```bash
+minikube ip
+```
+
+Test in browser:
+
+```url
+http://<MINIKUBE_IP>:30007/demo
+```
+
+---
+
+### 6. Switch to LoadBalancer (on cloud)
+
+If on AWS/GCP/Azure:
+
+```bash
+kubectl edit svc python-django-app-service
+```
+
+Change:
+
+```yaml
+type: LoadBalancer
+```
+
+On Minikube, install **MetalLB** for load balancer simulation.
+
+---
+
+### 7. Test Service Discovery by Breaking Selector
+
+Edit the selector to an incorrect label:
+
+```yaml
+selector:
+  app: sample-python-apx
+```
+
+Apply again:
+
+```bash
+kubectl apply -f service.yaml
+```
+
+Now try accessing the app again — it will fail.
+
+Revert label and reapply to restore traffic.
+
+---
+
+### 8. Visualize Load Balancing with Cubeshark
+
+Install Cubeshark (use instructions from their docs). Start listener:
+
+```bash
+cubeshark tap -A
+```
+
+Open browser:
+
+```url
+http://localhost:8899
+```
+
+Now send 6 requests:
+
+```bash
+curl -L http://<MINIKUBE_IP>:30007/demo
+```
+
+Run this 6 times. In Cubeshark dashboard, see traffic round-robin between pods.
+
+---
+
+## ✅ Final Recap of Concepts
+
+1. **Service Discovery** — proven by changing selector
+2. **Application Exposure** — shown via NodePort and LoadBalancer
+3. **Load Balancing** — demonstrated through Cubeshark traffic view
+
+Cubeshark helps confirm network flow from user to node to pod with live traffic inspection.
+
+---
+
+Thank you for watching! 🙌
+
+* Like this video
+* Drop comments below
+* Share with your friends
+
+**See you in the next session! – Abhishek**
+
+
+**Hello everyone!**
+
+My name is Abhishek, and welcome back to my channel. So today we are at **Day 37** of our complete DevOps course and in this class, we will **deep dive into Kubernetes services**. That means we'll be doing a **practical session** on Kubernetes Services where you will see the aspects that we were talking about like **load balancing**, **service discovery**, as well as **how to expose your applications to the outside world** in Kubernetes.
+
+So everything will be practical. I'll recommend everybody to watch the video till the end because we are doing practical traffic viewing using **Cubeshark**. So Cubeshark is a tool which will help you to understand how traffic is flowing within the Kubernetes cluster — how each component of Kubernetes is talking, like how one component is talking to the other component. So it will be a very interesting session, and you will see all the capabilities using Cubeshark — like how services are doing the load balancing within multiple pods, how services are able to discover the pods, and also we will see how to expose the applications to the outside world as well as within the Kubernetes cluster and within your organization.
+
+Perfect. So without wasting any time, I'll quickly jump onto the video. But a disclaimer and a very important point — watch the video till the end because even if you know the concept of services, even if you understand Kubernetes, using Cubeshark I am going to show you **how the traffic is flowing**, so it's a very useful session.
+
+---
+
+### Setting Up Kubernetes Cluster
+
+For the purpose of the demo, I already have a Kubernetes cluster. It's a Minikube Kubernetes cluster. If you just run `minikube status`, you will see that the Kubernetes cluster is already up and running. If you don’t know how to create a Kubernetes cluster, you can watch my previous videos where I explained how to create one using both **Minikube** and **AWS (using kOps)**.
+
+Let me clean up the resources using `kubectl get all`, `kubectl delete deploy`, and `kubectl delete svc` commands. After deleting, only the default Kubernetes service should remain.
+
+---
+
+### Building and Deploying the Application
+
+We'll use the **Docker 0-to-Hero** repository from my GitHub that contains real-time backend/frontend images built using Python and Golang. For this demo, we’ll use the Python app.
+
+In the Python folder, there is a Dockerfile and `requirements.txt`. Let’s build the Docker image:
+
+```bash
+docker build -t python-sample-app-demo:v1 .
+```
+
+Now, let’s create a deployment YAML using:
+
+```bash
+kubectl create deployment sample-python-app --image=python-sample-app-demo:v1 --dry-run=client -o yaml > deployment.yaml
+```
+
+Modify the YAML to set **replicas to 2** for load balancing, add labels (`app: sample-python-app`), expose container port 8000, and ensure the label in the pod matches the selector.
+
+Apply the deployment:
+
+```bash
+kubectl apply -f deployment.yaml
+```
+
+Verify using:
+
+```bash
+kubectl get deploy
+kubectl get pods
+kubectl get pods -o wide
+```
+
+Optionally, use `-v=7` or `-v=9` to understand the API interaction.
+
+---
+
+### Exposing via Services
+
+By default, pods are accessible only inside the cluster. Use **NodePort** to expose externally.
+
+Create a `service.yaml` using Kubernetes documentation. Set:
+
+* `selector: app: sample-python-app`
+* `type: NodePort`
+* `port: 80`
+* `targetPort: 8000`
+* `nodePort: 30007`
+
+Apply using:
+
+```bash
+kubectl apply -f service.yaml
+kubectl get svc
+```
+
+Access via:
+
+```bash
+curl -L http://<MINIKUBE_IP>:30007/demo
+```
+
+You can also open this in the browser.
+
+---
+
+### Switching to LoadBalancer
+
+To expose the app publicly:
+
+```bash
+kubectl edit svc python-django-app-service
+```
+
+Change `type: NodePort` to `type: LoadBalancer`.
+
+> Note: This only works on cloud providers (AWS, GCP, Azure). Minikube users can use **MetalLB**.
+
+---
+
+### Demonstrating Service Discovery
+
+To break service discovery, change the selector in the service to a wrong label and reapply. Observe that the service fails to route traffic. Revert it back and confirm that service discovery resumes.
+
+---
+
+### Load Balancing Using Cubeshark
+
+Install Cubeshark using the official instructions. Run:
+
+```bash
+cubeshark tap -A
+```
+
+Visit:
+
+```url
+http://localhost:8899
+```
+
+Then execute:
+
+```bash
+curl -L http://<MINIKUBE_IP>:30007/demo
+```
+
+Run it 6 times. In Cubeshark, observe alternating traffic between the two pods — confirming **round robin load balancing**.
+
+---
+
+### Recap of Concepts
+
+In this session, we covered:
+
+1. **Service Discovery** using labels and selectors
+2. **Application Exposure** using NodePort and LoadBalancer
+3. **Load Balancing** using Cubeshark visualization
+
+Cubeshark helps visualize packet flow — from source IP to node to service to pod — and confirms how Kubernetes handles traffic routing.
+
+This concludes the demo. I hope you enjoyed it. If you found this video useful:
+
+* Like the video 👍
+* Comment with your feedback 💬
+* Share with your friends and colleagues 📤
+
+**Thank you, see you in the next video! – Abhishek**
+
+
+
 ![image](https://github.com/user-attachments/assets/6dbb1db1-9f64-437f-a8da-918a19f35e0c)
 ![image](https://github.com/user-attachments/assets/10b55b28-3f8e-428e-bade-c1da2f0dad07)
 ![image](https://github.com/user-attachments/assets/76f88840-2d1c-48b6-a585-dc2b51df4fbc)
