@@ -192,6 +192,7 @@ for i in {1..6}; do curl http://<minikube-ip>:30007/demo; done
 1. **Service Discovery** using labels and selectors
 2. **Exposing applications** using NodePort and LoadBalancer
 3. **Load Balancing** across multiple pods
+4. Solve IP change issues via **labels and selectors**.
 
 ---
 
